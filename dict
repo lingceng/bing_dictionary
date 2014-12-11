@@ -1,0 +1,93 @@
+#!/usr/bin/env ruby
+# encoding: utf-8
+
+require 'net/http'
+require 'rexml/document'
+require 'cgi'
+
+class YoudaoDict
+
+  def translate(word)
+    if word && !word.empty?
+      @word = word
+      parse Net::HTTP.get( "cn.bing.com", "/dict/search?q=#{word}" )
+    end
+  end
+
+  def parse(src)
+    main = src.scan(%r{<div class="lf_area">.*<div class="sidebar">}m)[0]
+    parse_phonetic_symbol main
+
+    __ 'Translate'
+    parse_dict_trans      main
+
+    __ "Sample Sentence"
+    parse_sample       main
+  end
+
+  protected
+    def parse_phonetic_symbol( xml )
+      xml.scan(%r{<div class="hd_prUS">[^\[]*(.*?)</div>}) do |text|
+        indent
+        puts "#{@word} #{clean(text[0]).cyan}"
+      end
+    end
+
+    def parse_dict_trans( xml )
+      xml.scan(%r{<span class="pos[^"]*">.*?</span><span class="def[^"]*">.*?</span>}) do |text|
+        indent
+        puts clean(text).green
+      end
+    end
+
+    def parse_sample( xml )
+      xml.scan(%r{<div class="se_li">.*?<div class="se_li">}) do |text|
+          indent
+          puts clean(text)
+      end
+    end
+
+
+  private
+    def __(t, pad='-', len=30 )
+      puts " #{t} ".center(len, pad)
+    end
+
+    def indent(idt=2)
+      print " " * idt
+    end
+
+    def clean( xml )
+     CGI.unescapeHTML(xml.gsub(/<\/?[^>]+>/, ''))
+    end
+
+end
+
+##################################
+######## Helper classes ##########
+##################################
+
+module REXML
+  # REXML::Element patch
+  # for better readablitiy
+  class Element
+    def each_node(path, &block); XPath.each(self, path, &block); end
+    def first_node(path); XPath.first(self, path); end
+  end
+end
+
+class String
+  COLORS = %w(black red green yellow blue magenta cyan white)
+  COLORS.each_with_index do |color, idx|
+    define_method color do
+      "\e[3#{idx}m" << self.to_s << "\e[0m"
+    end
+
+    define_method "#{color}_bg" do
+      "\e[4#{idx}m" << self.to_s << "\e[0m"
+    end
+  end
+end
+
+## script entrace
+YoudaoDict.new.translate(ARGV.join ' ') if __FILE__ == $0
