@@ -9,13 +9,15 @@ class YoudaoDict
 
   def translate(word)
     if word && !word.empty?
-      @word = word
-      parse Net::HTTP.get( "cn.bing.com", "/dict/search?q=#{word}" )
+      @word = CGI::escape(word)
+      parse Net::HTTP.get( "cn.bing.com", "/dict/search?q=#{@word}" )
     end
   end
 
   def parse(src)
     main = src.scan(%r{<div class="lf_area">.*<div class="sidebar">}m)[0]
+    return unless main
+
     parse_phonetic_symbol main
 
     __ 'Translate'
@@ -29,7 +31,7 @@ class YoudaoDict
     def parse_phonetic_symbol( xml )
       xml.scan(%r{<div class="hd_prUS">[^\[]*(.*?)</div>}) do |text|
         indent
-        puts "#{@word} #{clean(text[0]).cyan}"
+        puts "#{@word} #{clean(text[0]).cyan}" if text
       end
     end
 
@@ -58,7 +60,7 @@ class YoudaoDict
     end
 
     def clean( xml )
-     CGI.unescapeHTML(xml.gsub(/<\/?[^>]+>/, ''))
+      CGI.unescapeHTML(xml.force_encoding('UTF-8').gsub(/<\/?[^>]+>/, ''))
     end
 
 end
