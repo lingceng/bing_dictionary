@@ -7,6 +7,8 @@ translate English to Chinese.
 
 Heavily borrowed from [Command-Line-Youdao-Dictionary](https://github.com/qhwa/Command-Line-Youdao-Dictionary)
 
+![Animated demonstration](./bing_dictionary.gif)
+
 ## Usage
 
     ./dict <word>
