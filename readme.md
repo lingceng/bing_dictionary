@@ -27,3 +27,18 @@ You can make it work tegother with Vim by add follows to $HOME/.vimrc
     nnoremap <leader>d :!dict <cword><CR>
     vnoremap <leader>d y:!dict <c-r>"<CR>
 
+Or you can make it better if you use **neovim** or **Vimux**.
+
+    if has('nvim')
+      nnoremap <leader>d :botright 14split \| term dict <cword><CR>
+      vnoremap <leader>d y:botright 14split \| term dict <c-r>"<CR>
+    else
+      if exists("*VimuxRunCommand")
+        vnoremap <leader>d "vy:call VimuxRunCommand('dict ' . getreg('v'))<CR>
+        nmap <leader>d viw<leader>d<CR>
+      else
+        nnoremap <leader>d :!dict <cword><CR>
+        vnoremap <leader>d y:!dict <c-r>"<CR>
+      end
+    end
+
