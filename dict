@@ -15,13 +15,14 @@ class YoudaoDict
   end
 
   def parse(src)
-    main = src.scan(%r{<div class="lf_area">.*<div class="sidebar">}m)[0]
+    main = src.scan(%r{<div class=".*lf_area.*">.*<script}m)[0]
     return unless main
 
     parse_phonetic_symbol main
 
     __ 'Translate'
     parse_dict_trans      main
+    parse_machine_translation main
 
     __ "Sample Sentence"
     parse_sample       main
@@ -36,9 +37,23 @@ class YoudaoDict
     end
 
     def parse_dict_trans( xml )
-      xml.scan(%r{<span class="pos[^"]*">.*?</span><span class="def[^"]*">.*?</span>}) do |text|
+      xml.scan(%r{<span class="pos[^"]*">.*?</span><span class="def[^"]*">.*?</li>}) do |text|
         indent
         puts clean(text).green
+      end
+    end
+
+    def parse_machine_translation( xml )
+      xml.scan(%r{<div class="p1\-\d\d">.*?</div>}) do |text|
+        indent
+        puts "#{clean(text).green}" if text
+      end
+    end
+
+    def parse_meta( xml, name )
+      xml.scan(%r{<meta name="#{name}" content="(.*?)"/>}) do |text|
+        indent
+        puts "#{text[0].green}" if text
       end
     end
 
