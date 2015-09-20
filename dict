@@ -12,6 +12,9 @@ class YoudaoDict
       @word = CGI::escape(word)
       parse Net::HTTP.get( "cn.bing.com", "/dict/search?q=#{@word}" )
     end
+  rescue SocketError
+    warn 'Connection failed! Please check your network.'
+    exit 1
   end
 
   def parse(src)
