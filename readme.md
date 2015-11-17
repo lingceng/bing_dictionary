@@ -33,4 +33,8 @@ Now long sentence is supported
     ./dict 你好吗
     ./dict How old are you
 
+## For Mac user
+You can open your local dictionary.app with `open dict://someword`. It may be faster.
+Add following to your vimrc to make it work in vim:
 
+    nnoremap <leader>dd :!open dic://<cword><CR>
