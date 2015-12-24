@@ -1,99 +1,68 @@
 #!/usr/bin/env ruby
-# encoding: utf-8
 
-require 'net/http'
-require 'rexml/document'
+require 'nokogiri'
+require 'open-uri'
 require 'cgi'
 
-class YoudaoDict
+class Bing
+  attr_reader :doc
 
-  def translate(word)
-    if word && !word.empty?
-      @word = CGI::escape(word)
-      parse Net::HTTP.get( "cn.bing.com", "/dict/search?q=#{@word}" )
-    end
+  def self.translate(word)
+    self.new(word).translate
   rescue SocketError
     warn 'Connection failed! Please check your network.'
     exit 1
   end
 
-  def parse(src)
-    main = src.scan(%r{<div class=".*lf_area.*">.*<script}m)[0]
-    return unless main
-
-    parse_phonetic_symbol main
-
-    __ 'Translate'
-    parse_dict_trans      main
-    parse_machine_translation main
-
-    __ "Sample Sentence"
-    parse_sample       main
+  def initialize(word)
+    file = open("http://cn.bing.com/dict/?q=#{CGI::escape(word)}")
+    @doc = Nokogiri::HTML(file)
   end
 
-  protected
-    def parse_phonetic_symbol( xml )
-      xml.scan(%r{<div class="hd_prUS">[^\[]*(.*?)</div>}) do |text|
-        indent
-        puts "#{@word} #{clean(text[0]).cyan}" if text
-      end
-    end
-
-    def parse_dict_trans( xml )
-      xml.scan(%r{<span class="pos[^"]*">.*?</span><span class="def[^"]*">.*?</li>}) do |text|
-        indent
-        puts clean(text).green
-      end
-    end
-
-    def parse_machine_translation( xml )
-      xml.scan(%r{<div class="p1\-\d\d">.*?</div>}) do |text|
-        indent
-        puts "#{clean(text).green}" if text
-      end
-    end
-
-    def parse_meta( xml, name )
-      xml.scan(%r{<meta name="#{name}" content="(.*?)"/>}) do |text|
-        indent
-        puts "#{text[0].green}" if text
-      end
-    end
-
-    def parse_sample( xml )
-      xml.scan(%r{<div class="se_li">.*?<div class="se_li">}) do |text|
-          indent
-          puts clean(text)
-      end
-    end
-
-
-  private
-    def __(t, pad='-', len=30 )
-      puts " #{t} ".center(len, pad)
-    end
-
-    def indent(idt=2)
-      print " " * idt
-    end
-
-    def clean( xml )
-      CGI.unescapeHTML(xml.force_encoding('UTF-8').gsub(/<\/?[^>]+>/, ''))
-    end
-
-end
-
-##################################
-######## Helper classes ##########
-##################################
-
-module REXML
-  # REXML::Element patch
-  # for better readablitiy
-  class Element
-    def each_node(path, &block); XPath.each(self, path, &block); end
-    def first_node(path); XPath.first(self, path); end
+  def translate
+    head if doc.at_css('#headword')
+    machine if doc.at_css('.smt_hw')
+    sentence if doc.at_css('#sentenceSeg .se_li')
+    guess if doc.at_css('.dym_area')
   end
+
+  def head
+    puts doc.at_css('#headword').text
+    puts doc.at_css('.hd_tf_lh').text.green
+    puts
+    doc.at_css('.hd_area').next_sibling.css('li').each do |li|
+      puts li.at_css('.pos').text.fixed(5).blue + li.at_css('.def').text
+    end
+  end
+
+  def machine
+    puts doc.at_css('.smt_hw').text
+    puts doc.at_css('.p1-10').text
+    puts doc.at_css('.p1-11').text.green
+  end
+
+  def sentence
+    puts
+    doc.css('#sentenceSeg .se_li').first(4).map do |li|
+      puts li.css('.sen_en').text
+      puts li.css('.sen_cn').text
+      puts
+    end
+  end
+
+  def guess
+    puts
+    content = doc.at_css('.content')
+    puts content.at_css('.p2-2').text
+    puts
+
+    content.css('.dym_area').each do |area|
+        puts area.at_css('.df_wb_a').text
+        puts area.css('.df_wb_c').map(&:text)
+        puts
+    end
+  end
+
 end
 
 class String
@@ -106,8 +75,14 @@ class String
     define_method "#{color}_bg" do
       "\e[4#{idx}m" << self.to_s << "\e[0m"
     end
+
+    def fixed(width)
+      width = width - self.each_char.count { |c| c =~ /\p{Han}/ }
+      width > 0 ? ("%-#{width}s" % self) : self
+    end
   end
 end
 
 ## script entrace
-YoudaoDict.new.translate(ARGV.join ' ') if __FILE__ == $0
+Bing.translate(ARGV.join ' ') if __FILE__ == $0
+
