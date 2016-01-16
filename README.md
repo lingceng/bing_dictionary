@@ -25,19 +25,12 @@ Or install it yourself as:
     $ gem install bing_dictionary
 
 ## Usage
-Download the dict file and make it runable.
-Current version need nokogiri installed:
-
-    gem install nokogiri
+A `dict` runable bin file provided.
 
 DEMO：
 
-    ./dict cake
-    ./dict 蛋糕
-
-You'd better add configuration to $HOME/.bashrc or $HOME/.profile to make alias
-
-    alias d="/path/to/dict"
+    dict cake
+    dict 蛋糕
 
 You can make it work tegother with Vim by add follows to $HOME/.vimrc
 
@@ -47,12 +40,12 @@ You can make it work tegother with Vim by add follows to $HOME/.vimrc
 ## Support long sentence
 Now long sentence is supported
 
-    ./dict 你好吗
-    ./dict How old are you
+    dict 你好吗
+    dict How old are you
 
 ## Support fuzzy query
 
-    ./dict hexxo
+    dict hexxo
 
     您要找的是不是
 
