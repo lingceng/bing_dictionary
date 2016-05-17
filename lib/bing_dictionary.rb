@@ -7,16 +7,17 @@ module BingDictionary
   class Base
     attr_reader :doc
 
-    def self.translate(word)
-      self.new(word).translate
+    def self.translate(word, options = {})
+      self.new(word, options).translate
     rescue SocketError
       warn 'Connection failed! Please check your network.'
       exit 1
     end
 
-    def initialize(word)
+    def initialize(word, options = {})
       file = open("http://cn.bing.com/dict/?q=#{CGI::escape(word)}")
       @doc = Nokogiri::HTML(file)
+      @options = options
     end
 
     def translate
@@ -24,6 +25,7 @@ module BingDictionary
       machine if doc.at_css('.smt_hw')
       sentence if doc.at_css('#sentenceSeg .se_li')
       guess if doc.at_css('.dym_area')
+      pronounce if doc.at_css('#headword') && @options[:pronounce]
     end
 
     def head
@@ -33,6 +35,12 @@ module BingDictionary
       doc.at_css('.hd_area').next_sibling.css('li').each do |li|
         puts li.at_css('.pos').text.fixed(5).blue + li.at_css('.def').text
       end
+    end
+
+    def pronounce
+      url = doc.at_css('.hd_tf_lh .hd_tf a').attr('onclick').match(/http.*mp3/)
+      `curl -o /tmp/dict.mp3 #{url} &> /dev/null`
+      `afplay /tmp/dict.mp3`
     end
 
     def machine

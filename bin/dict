@@ -1,5 +1,15 @@
 #!/usr/bin/env ruby
 
 require "bing_dictionary"
+require 'optparse'
 
-BingDictionary::Base.translate(ARGV.join ' ')
+options = {}
+OptionParser.new do |opts|
+  opts.banner = "Usage: dict [-p] hello"
+
+  opts.on("-p", "--[no-]pronounce", "Pronounce the word") do |v|
+    options[:pronounce] = v
+  end
+end.parse!
+
+BingDictionary::Base.translate(ARGV.join(' '), options) unless ARGV.empty?
