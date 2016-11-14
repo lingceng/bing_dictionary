@@ -4,12 +4,28 @@ require "bing_dictionary"
 require 'optparse'
 
 options = {}
-OptionParser.new do |opts|
-  opts.banner = "Usage: dict [-p] hello"
-
+option_parser = OptionParser.new do |opts|
+  opts.banner = "Example: dict hello"
   opts.on("-p", "--[no-]pronounce", "Pronounce the word") do |v|
     options[:pronounce] = v
   end
-end.parse!
+  opts.on("-j", "--[no-]jump", "Jump to web page") do |v|
+    options[:jump] = v
+  end
+  opts.on("-v", "--version", "Show the version") do |v|
+    options[:version] = v
+  end
+end
 
-BingDictionary::Base.translate(ARGV.join(' '), options) unless ARGV.empty?
+if ARGV.empty?
+  option_parser.parse('--help')
+else
+  option_parser.parse!
+  if options[:version]
+    puts BingDictionary::VERSION
+  elsif options[:jump]
+    `open http://cn.bing.com/dict/?q=#{CGI::escape(ARGV.join(' '))}`
+  else
+    BingDictionary::Base.translate(ARGV.join(' '), options)
+  end
+end

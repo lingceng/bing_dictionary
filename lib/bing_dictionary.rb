@@ -65,9 +65,9 @@ module BingDictionary
       puts
 
       content.css('.dym_area').each do |area|
-          puts area.at_css('.df_wb_a').text
-          puts area.css('.df_wb_c').map(&:text)
-          puts
+        puts area.at_css('.df_wb_a').text
+        puts area.css('.df_wb_c').map(&:text)
+        puts
       end
     end
 
