@@ -79,11 +79,11 @@ class String
   COLORS = %w(black red green yellow blue magenta cyan white)
   COLORS.each_with_index do |color, idx|
     define_method color do
-      "\e[3#{idx}m" << self.to_s << "\e[0m"
+      $stdout.tty? ? "\e[3#{idx}m" << self.to_s << "\e[0m" : self
     end
 
     define_method "#{color}_bg" do
-      "\e[4#{idx}m" << self.to_s << "\e[0m"
+      $stdout.tty? ? "\e[4#{idx}m" << self.to_s << "\e[0m" : self
     end
   end
 
