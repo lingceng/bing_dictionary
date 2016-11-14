@@ -10,18 +10,6 @@ It uses http://cn.bing.com/dict/ to query.
 
 ## Installation
 
-Add this line to your application's Gemfile:
-
-```ruby
-gem 'bing_dictionary'
-```
-
-And then execute:
-
-    $ bundle
-
-Or install it yourself as:
-
     $ gem install bing_dictionary
 
 ## Usage
@@ -29,23 +17,18 @@ A `dict` runable bin file provided.
 
 DEMO：
 
-    dict cake
-    dict 蛋糕
-
-You can make it work tegother with Vim by add follows to $HOME/.vimrc
-
-    nnoremap <leader>d :!dict <cword><CR>
-    vnoremap <leader>d y:!dict <c-r>"<CR>
+    $ dict cake
+    $ dict 蛋糕
 
 ## Support long sentence
 Now long sentence is supported
 
-    dict 你好吗
-    dict How old are you
+    $ dict 你好吗
+    $ dict How old are you
 
 ## Support fuzzy query
 
-    dict hexxo
+    $ dict hexxo
 
     您要找的是不是
 
@@ -55,11 +38,30 @@ Now long sentence is supported
     hexode六极管
     ...
 
-## For Mac user
-You can open your local dictionary.app with `open dict://someword`. It may be faster.
-Add following to your vimrc to make it work in vim:
+## Support Chinese to English
 
-    nnoremap <leader>dd :!open dic://<cword><CR>
+    $ dict 单片机
+    单片机
+
+    网络 MCU; Single Chip Microcomputer; Microcontroller
+
+    The monolithic integrated circuit occurs the explanation , did not understand may have a look !
+    单片机发生的讲解，不懂得可以看看！
+    ...
+
+## More options
+
+    $ dict --help
+    Example: dict hello
+        -p, --[no-]pronounce             Pronounce the word
+        -j, --[no-]jump                  Jump to web page
+        -v, --version                    Show the version
+
+## Work with vim
+You can make it work tegother with Vim by add follows to $HOME/.vimrc
+
+    nnoremap <leader>d :!dict <cword><CR>
+    vnoremap <leader>d y:!dict <c-r>"<CR>
 
 ## Thanks
 Heavily borrowed from [Command-Line-Youdao-Dictionary](https://github.com/qhwa/Command-Line-Youdao-Dictionary)
