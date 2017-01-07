@@ -5,7 +5,7 @@ require "bing_dictionary/version"
 
 module BingDictionary
   class Base
-    attr_reader :doc
+    attr_accessor :doc, :options, :word
 
     def self.translate(word, options = {})
       self.new(word, options).translate
@@ -16,8 +16,9 @@ module BingDictionary
 
     def initialize(word, options = {})
       file = open("http://cn.bing.com/dict/?q=#{CGI::escape(word)}")
-      @doc = Nokogiri::HTML(file)
-      @options = options
+      self.word = word
+      self.doc = Nokogiri::HTML(file)
+      self.options = options
     end
 
     def translate
@@ -25,15 +26,15 @@ module BingDictionary
       machine if doc.at_css('.smt_hw')
       sentence if doc.at_css('#sentenceSeg .se_li')
       guess if doc.at_css('.dym_area')
-      pronounce if doc.at_css('#headword') && @options[:pronounce]
+      pronounce if doc.at_css('#headword') && options[:pronounce]
     end
 
     def head
       puts doc.at_css('#headword').text
-      puts doc.at_css('.hd_tf_lh').text.green
+      puts with_color(doc.at_css('.hd_tf_lh').text, :green)
       puts
       doc.at_css('.hd_area').next_sibling.css('li').each do |li|
-        puts li.at_css('.pos').text.fixed(5).blue + li.at_css('.def').text
+        puts with_color(with_fixed(li.at_css('.pos').text, 5), :blue) + li.at_css('.def').text
       end
     end
 
@@ -46,13 +47,13 @@ module BingDictionary
     def machine
       puts doc.at_css('.smt_hw').text
       puts doc.at_css('.p1-10').text
-      puts doc.at_css('.p1-11').text.green
+      puts with_color(doc.at_css('.p1-11').text, :green)
     end
 
     def sentence
       puts
       doc.css('#sentenceSeg .se_li').first(4).map do |li|
-        puts li.css('.sen_en').text
+        puts with_highlight(li.css('.sen_en').text, word)
         puts li.css('.sen_cn').text
         puts
       end
@@ -71,24 +72,18 @@ module BingDictionary
       end
     end
 
-  end
-
-end
-
-class String
-  COLORS = %w(black red green yellow blue magenta cyan white)
-  COLORS.each_with_index do |color, idx|
-    define_method color do
-      $stdout.tty? ? "\e[3#{idx}m" << self.to_s << "\e[0m" : self
+    COLORS = %i[ black red green yellow blue magenta cyan white ]
+    def with_color(str, color)
+      "\e[3#{COLORS.index(color)}m" << str.to_s << "\e[0m"
     end
 
-    define_method "#{color}_bg" do
-      $stdout.tty? ? "\e[4#{idx}m" << self.to_s << "\e[0m" : self
+    def with_fixed(str, width)
+      width = width - str.each_char.count { |c| c =~ /\p{Han}/ }
+      width > 0 ? ("%-#{width}s" % str) : str
     end
-  end
 
-  def fixed(width)
-    width = width - self.each_char.count { |c| c =~ /\p{Han}/ }
-    width > 0 ? ("%-#{width}s" % self) : self
+    def with_highlight(str, keyword)
+      str.gsub(/#{keyword}/i) { |s| with_color(s, :yellow) }
+    end
   end
 end

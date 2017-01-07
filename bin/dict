@@ -1,6 +1,5 @@
 #!/usr/bin/env ruby
 
-require "bing_dictionary"
 require 'optparse'
 
 options = {}
@@ -9,7 +8,10 @@ option_parser = OptionParser.new do |opts|
   opts.on("-p", "--[no-]pronounce", "Pronounce the word") do |v|
     options[:pronounce] = v
   end
-  opts.on("-j", "--[no-]jump", "Jump to web page") do |v|
+  opts.on("-c", "--[no-]cache", "Use cache from ~/.bing_dictionary.db (Default on)") do |v|
+    options[:cache] = v
+  end
+  opts.on("-j", "--jump", "Jump to web page") do |v|
     options[:jump] = v
   end
   opts.on("-v", "--version", "Show the version") do |v|
@@ -21,11 +23,32 @@ if ARGV.empty?
   option_parser.parse('--help')
 else
   option_parser.parse!
+  word = ARGV.join(' ')
   if options[:version]
+    require "bing_dictionary"
     puts BingDictionary::VERSION
   elsif options[:jump]
-    `open http://cn.bing.com/dict/?q=#{CGI::escape(ARGV.join(' '))}`
+    `open http://cn.bing.com/dict/?q=#{CGI::escape(word)}`
   else
-    BingDictionary::Base.translate(ARGV.join(' '), options)
+    require 'dbm'
+    DBM.open(File.join(Dir.home, '.bing_dictionary')) do |cache|
+      if cache.key?(word) && options[:cache] != false
+        puts cache[word]
+      else
+        require "bing_dictionary"
+
+        backup = $stdout
+        $stdout = StringIO.new
+        BingDictionary::Base.translate(word, options)
+        out = $stdout.string
+        $stdout = backup
+
+        if out && out.length > 0
+          cache[word] = out
+          puts out
+        end
+      end
+    end
   end
 end
+

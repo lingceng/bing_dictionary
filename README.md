@@ -49,12 +49,17 @@ Now long sentence is supported
     单片机发生的讲解，不懂得可以看看！
     ...
 
+## Local cache supported
+All queried word default cached to ~/.bing_dictionary.db.
+So it's much faster when you query the word again.
+
 ## More options
 
     $ dict --help
     Example: dict hello
         -p, --[no-]pronounce             Pronounce the word
-        -j, --[no-]jump                  Jump to web page
+        -c, --[no-]cache                 Use cache from ~/.bing_dictionary.db (Default on)
+        -j, --jump                       Jump to web page
         -v, --version                    Show the version
 
 ## Work with vim
