@@ -1,9 +1,7 @@
 # BingDictionary
 
-这是一个ruby脚本，用来在命令行中直接查询单词含义，免去打开软件或浏览器的麻烦。
-
 Here is a command line dictionary written with ruby that can
-translate English to Chinese.
+translate English to Chinese or vice versa.
 
 It uses http://cn.bing.com/dict/ to query.
 ![DEMO ](./dict.png)
@@ -68,10 +66,7 @@ You can cache them all with following script:
         -v, --version                    Show the version
 
 ## Work with vim
-You can make it work tegother with Vim by add follows to $HOME/.vimrc
-
-    nnoremap <leader>d :!dict <cword><CR>
-    vnoremap <leader>d y:!dict <c-r>"<CR>
+You can make it work tegother with Vim with [bing_dictionary.vim](https://github.com/lingceng/bing_dictionary.vim)
 
 ## Thanks
 Heavily borrowed from [Command-Line-Youdao-Dictionary](https://github.com/qhwa/Command-Line-Youdao-Dictionary)
