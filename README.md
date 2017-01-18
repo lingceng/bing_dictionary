@@ -54,7 +54,7 @@ So it's much faster when you query the word again.
 [Here](https://github.com/first20hours/google-10000-english) have the most common English words.
 You can cache them all with following script:
 
-    cat google-10000-english.txt | while read line; do dict $line; done
+    curl https://raw.githubusercontent.com/first20hours/google-10000-english/master/google-10000-english-no-swears.txt | while read line; do dict $line; done
 
 ## More options
 
