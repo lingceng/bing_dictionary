@@ -15,7 +15,7 @@ module BingDictionary
     end
 
     def initialize(word, options = {})
-      file = open("http://cn.bing.com/dict/?q=#{CGI::escape(word)}")
+      file = URI.open("http://cn.bing.com/dict/?q=#{CGI::escape(word)}")
       self.word = word
       self.doc = Nokogiri::HTML(file)
       self.options = options
