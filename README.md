@@ -75,6 +75,13 @@ Heavily borrowed from [Command-Line-Youdao-Dictionary](https://github.com/qhwa/C
 
     bundle exec ./bin/dict --no-cache hello
 
+    // Install gem in local
+    rake install
+    // Build new version
+    rake build
+    // Build new gem and publish to https://rubygems.org
+    rake release
+
 ## Contributing
 
 Bug reports and pull requests are welcome on GitHub at https://github.com/lingceng/bing_dictionary. This project is intended to be a safe, welcoming space for collaboration, and contributors are expected to adhere to the [Contributor Covenant](http://contributor-covenant.org) code of conduct.

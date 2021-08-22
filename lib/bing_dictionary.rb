@@ -2,6 +2,8 @@ require 'nokogiri'
 require 'open-uri'
 require 'cgi'
 require "bing_dictionary/version"
+require "uri"
+require "net/http"
 
 module BingDictionary
   class Base
@@ -14,10 +16,22 @@ module BingDictionary
       exit 1
     end
 
+    def request(word)
+      url = URI("https://cn.bing.com/dict/search?q=#{CGI::escape(word)}")
+
+      https = Net::HTTP.new(url.host, url.port)
+      https.use_ssl = true
+      request = Net::HTTP::Get.new(url)
+      request["Cookie"] = "_EDGE_S=mkt=zh-cn;"
+
+      response = https.request(request)
+      return response.read_body
+    end
+
     def initialize(word, options = {})
-      file = URI.open("http://cn.bing.com/dict/?q=#{CGI::escape(word)}")
+      body = self.request(word)
       self.word = word
-      self.doc = Nokogiri::HTML(file)
+      self.doc = Nokogiri::HTML(body)
       self.options = options
     end
 
